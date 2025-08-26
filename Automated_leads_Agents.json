@@ -1,0 +1,482 @@
+{
+  "name": "Automated_leads_Agents",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "leads",
+        "formDescription": "input your details below.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name ",
+              "placeholder": "John Doe",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "placeholder": "Johndoe@gmail.com",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Budget",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "<$10,000"
+                  },
+                  {
+                    "option": "$10,000-$50,000"
+                  },
+                  {
+                    "option": ">$50,000"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Industry ",
+              "placeholder": "Tech",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Services Required",
+              "placeholder": "CRM Consulting"
+            },
+            {
+              "fieldLabel": "=Organization",
+              "placeholder": "Salesforce"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "60927d48-85b1-4f44-87b7-07b8ed72d479",
+      "name": "On form submission",
+      "webhookId": "6a1df761-b3c5-484d-9451-04d0c31bc51a"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c05598f5-0dbd-4494-9190-b49ac87ef81e",
+              "name": "Date",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "4f432dc3-e20e-484d-9d21-c8a03cc6b9cf",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a are DataLinks AI, a premier AI automation and full-stack software development company specializing in Automation medium to large sized businesses. Assume your name is Chris (Head of Client Relations) at Fake Company, LLC. A new lead has submitted the following information:\n\nName: {{ $('On form submission').item.json['Name '] }}\nEmail: {{ $('On form submission').item.json.Email }}\nOrganization:{{ $('On form submission').item.json.Organization }}\nIndustry: {{ $('On form submission').item.json['Industry '] }}\nServices Required: {{ $('On form submission').item.json['Services Required'] }}\nIndicated Budget: {{ $('On form submission').item.json.Budget }} (USD)\nDate Submitted:{{ $json.Date }}\n\nBased on this information, Please produce the following three outputs:\n\nSubject line: Create a Compelling email subject line that invites the leadsto schedule meeting. It should a meeting. It should be personalized and highlight the value of a desussion based on their submission.\n\nEmail Body: Write a personalized follow-up email thanking the lead for their inquiry. Summarize their requested services and mention how our expertise can help their organization. Include a clear invitation to set up a meeting to discuss further.\n\nLabel: Determine a lead value label using these rules:\n\nIf the Organization is large well -known or if the budget is above 50k, Label as \"High Value\"\n\nIf the Organization is if the budget is between 10k and 50k, Label as \"Mid Value Client\"\n\nIf the Organization is if the budget is below 10k, Label as \"Low Value Client\"\n\nAdditionally if the Industy is tech or B2B and the organization is not well larage comapny, Defult to \"Mid value Company\" unless the budget is above 50k.\n",
+              "role": "=system"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        416,
+        0
+      ],
+      "id": "a4fbf1d3-b02d-4397-aae0-81e3dd53ec3b",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "FlgTgZhAOItryglZ",
+          "name": "OpenAi account 7"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json.Email }}",
+        "subject": "={{ $json.message.content.subject_line }}",
+        "message": "={{ $json.message.content.email_body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        768,
+        0
+      ],
+      "id": "f432cbf6-0cf1-40af-a73a-f257dff31f64",
+      "name": "Send a message",
+      "webhookId": "f5078f9e-9ece-4453-9f34-ed45f46b912e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Uc4iHGDqG19tTI8D",
+          "name": "Gmail account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1lvFt07fUvKpnW4iXlywpVhP6146abbtfg7t1zYJx94w",
+          "mode": "list",
+          "cachedResultName": "Potential_Clients",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lvFt07fUvKpnW4iXlywpVhP6146abbtfg7t1zYJx94w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lvFt07fUvKpnW4iXlywpVhP6146abbtfg7t1zYJx94w/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('On form submission').item.json[\"Name \"] }}",
+            "Email": "={{ $('On form submission').item.json.Email }}",
+            "Organization": "={{ $('On form submission').item.json.Organization }}",
+            "Services Required": "={{ $('On form submission').item.json[\"Services Required\"] }}",
+            "Industry ": "={{ $('On form submission').item.json[\"Industry \"] }}",
+            "Budget": "={{ $('On form submission').item.json.Budget }}",
+            "Data Emai Sent ": "={{ $('Edit Fields').item.json.Date }}",
+            "Value ": "={{ $json.message.content.label }}"
+          },
+          "matchingColumns": [
+            "Name"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Organization",
+              "displayName": "Organization",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Services Required",
+              "displayName": "Services Required",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Industry ",
+              "displayName": "Industry ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Budget",
+              "displayName": "Budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Data Emai Sent ",
+              "displayName": "Data Emai Sent ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Value ",
+              "displayName": "Value ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        736,
+        160
+      ],
+      "id": "655b4418-523f-4de9-a00a-b7345d37d891",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YKsl3dfnZtiIaGFC",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        32,
+        416
+      ],
+      "id": "3bef9cdd-f12b-4b20-ba28-c1b8c63be1c7",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert email analyst.\nYou will first provide a daily summary for potential clients in my google sheets (making note of high value ones especially), and then send the daily email to our team at arhumhussain212@gmail.com\n\nMake sure the email is formatted properly (html) for gmail with proper line breaks. Your name for the signature will be \"Client Tracker Agent\"",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        416
+      ],
+      "id": "c71a473f-3006-40f3-81dc-8aca69b2097e",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        112,
+        624
+      ],
+      "id": "2b39445c-0ef2-47ae-9be0-fd25decb2645",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "FlgTgZhAOItryglZ",
+          "name": "OpenAi account 7"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1lvFt07fUvKpnW4iXlywpVhP6146abbtfg7t1zYJx94w",
+          "mode": "list",
+          "cachedResultName": "Potential_Clients",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lvFt07fUvKpnW4iXlywpVhP6146abbtfg7t1zYJx94w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1lvFt07fUvKpnW4iXlywpVhP6146abbtfg7t1zYJx94w/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        608,
+        576
+      ],
+      "id": "ae49a0d7-cf1b-4a04-a2db-99131d74e398",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YKsl3dfnZtiIaGFC",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "arhumhussain212@gmail.com",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        480,
+        720
+      ],
+      "id": "108463d6-8c56-4f4f-9ee4-4edae1f7ea62",
+      "name": "Send a message in Gmail",
+      "webhookId": "19ac49a9-dd38-4c17-a7bb-422beedd41c1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Uc4iHGDqG19tTI8D",
+          "name": "Gmail account 5"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "aa478868-1591-46b5-ada6-d737674f0fe6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6106dae91769aeda431b0e8d231b22487705a9f3d20053b27868bf691d881c1c"
+  },
+  "id": "VyxGwTFO3nS7YJ9a",
+  "tags": []
+}

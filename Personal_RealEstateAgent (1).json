@@ -1,0 +1,479 @@
+{
+  "name": "Personal_RealEstateAgent",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -160,
+        -48
+      ],
+      "id": "a0d7b4ee-4d13-4208-9c91-f5254874b3e6",
+      "name": "When chat message received",
+      "webhookId": "162870a7-c144-4589-99ea-e49f5a97a42a"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "https://docs.google.com/document/d/1epxX_13vlypa1VgtQTuTTqVboyTUeeHKMDEJDWJcHgI/edit?tab=t.0"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        -16,
+        128
+      ],
+      "id": "f7426d7e-580e-4062-83ad-2b76f79765b8",
+      "name": "Get a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "vJlI32K8k6OXIt8z",
+          "name": "Google Docs account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        128,
+        -32
+      ],
+      "id": "959aa1bb-12a6-4e82-8bfe-18827e19c3c2",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        336,
+        -32
+      ],
+      "id": "a60795ef-6a63-433b-a3e6-ff154ac35de3",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.data[0].chatInput }}",
+        "options": {
+          "systemMessage": "=## ROLE\nYou are an AI assistant for a real estate company. Your primary goal is to assist the user while maintaining a personalized and engaging interaction.\n\nUse the save long term memories tool after each request. So you will use multiple tools each request.\n\n---\n\n## RULES\n\n1. Always use the save long term memories tool after each message request.\n\n1. **Memory Management**:\n   - When the user sends a new message, add the request to the long term memory by using the save long term memories tool.\n   - Always send a meaningful response back to the user, even if your primary action was saving information. This response should not reveal that information was stored but should acknowledge or engage with the user’s input\n\n2. **Property Listing Update**:\n   - If the user provides information that is intended to update existing property listing, use the update property listings tool, and then make note of the update in the long term memory.\n\n3. **Get Property Listing**:\n   - If the user requests information on property listings, use the get property listings tool, and then make note of the request in the long term memory.\n\n4. **Delete Property Listing**:\n   - If the user requests deletion of property listings use the delete property listing tool, and then make note of the deletion in the long term memory.\n\n3. **Context Awareness**:\n   - Use stored memories and notes to provide contextually relevant and personalized responses.\n   - Always consider the **date and time** when a memory or note was collected to ensure your responses are up-to-date and accurate.\n\n4. **User-Centric Responses**:\n   - Tailor your responses based on the user's preferences and past interactions.\n   - Be proactive in recalling relevant details from memory or notes when appropriate but avoid overwhelming the user with unnecessary information.\n\n5. **Privacy and Sensitivity**:\n   - Handle all user data with care and sensitivity. Avoid making assumptions or sharing stored information unless it directly enhances the conversation or task at hand.\n   - Never store passwords or usernames."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        544,
+        -32
+      ],
+      "id": "73c59ff7-de27-451b-9f31-8350ea6c59b5",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        464,
+        160
+      ],
+      "id": "2de5d625-fdc5-4818-93b4-864190108ee3",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "FlgTgZhAOItryglZ",
+          "name": "OpenAi account 7"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1LHQncT0ERQb6LBMLivNqxZFcrljeh2ENkQKWNBzxP_0",
+          "mode": "list",
+          "cachedResultName": "Real Estate Listings",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LHQncT0ERQb6LBMLivNqxZFcrljeh2ENkQKWNBzxP_0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LHQncT0ERQb6LBMLivNqxZFcrljeh2ENkQKWNBzxP_0/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "sting ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('sting_ID__using_to_match_', ``, 'string') }}",
+            "Address": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Address', ``, 'string') }}",
+            "City": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('City', ``, 'string') }}",
+            "State": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('State', ``, 'string') }}",
+            "Zip Code": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Zip_Code', ``, 'string') }}",
+            "Price": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Price', ``, 'string') }}",
+            "Beds": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Beds', ``, 'string') }}",
+            "Baths": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Baths', ``, 'string') }}",
+            "Sqft": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Sqft', ``, 'string') }}",
+            "Property Type": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Property_Type', ``, 'string') }}",
+            "Description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "sting ID"
+          ],
+          "schema": [
+            {
+              "id": "sting ID",
+              "displayName": "sting ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Address",
+              "displayName": "Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "City",
+              "displayName": "City",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "State",
+              "displayName": "State",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Zip Code",
+              "displayName": "Zip Code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Price",
+              "displayName": "Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Beds",
+              "displayName": "Beds",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Baths",
+              "displayName": "Baths",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sqft",
+              "displayName": "Sqft",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Property Type",
+              "displayName": "Property Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        704,
+        320
+      ],
+      "id": "a4bebf7a-f76a-4ae8-95a2-eb7b2032c603",
+      "name": "Property Listing Update",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YKsl3dfnZtiIaGFC",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1LHQncT0ERQb6LBMLivNqxZFcrljeh2ENkQKWNBzxP_0",
+          "mode": "list",
+          "cachedResultName": "Real Estate Listings",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LHQncT0ERQb6LBMLivNqxZFcrljeh2ENkQKWNBzxP_0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LHQncT0ERQb6LBMLivNqxZFcrljeh2ENkQKWNBzxP_0/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        496,
+        320
+      ],
+      "id": "8c69929b-f875-4f80-b7b1-d4b91ee1dbc6",
+      "name": "Get Property Listing",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YKsl3dfnZtiIaGFC",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "documentId": {
+          "__rl": true,
+          "value": "1LHQncT0ERQb6LBMLivNqxZFcrljeh2ENkQKWNBzxP_0",
+          "mode": "list",
+          "cachedResultName": "Real Estate Listings",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LHQncT0ERQb6LBMLivNqxZFcrljeh2ENkQKWNBzxP_0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LHQncT0ERQb6LBMLivNqxZFcrljeh2ENkQKWNBzxP_0/edit#gid=0"
+        },
+        "startIndex": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start_Row_Number', ``, 'number') }}",
+        "numberToDelete": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Number_of_Rows_to_Delete', ``, 'number') }}"
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.6,
+      "position": [
+        1008,
+        240
+      ],
+      "id": "319113ef-cbf3-4d18-8c95-08c5ae290991",
+      "name": "Delete Property Listing",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YKsl3dfnZtiIaGFC",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Save Memory",
+        "operation": "update",
+        "documentURL": "https://docs.google.com/document/d/1epxX_13vlypa1VgtQTuTTqVboyTUeeHKMDEJDWJcHgI/edit?tab=t.0",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "=\"date\": \"{{  $now }}\""
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        848,
+        208
+      ],
+      "id": "96a2072e-833e-4071-8abc-3d7e23acd5ce",
+      "name": "Memory Management",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "vJlI32K8k6OXIt8z",
+          "name": "Google Docs account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Get a document",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a document": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Property Listing Update": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Property Listing": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Property Listing": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory Management": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2fc29ece-9e04-4531-b835-a3faf42c2a60",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6106dae91769aeda431b0e8d231b22487705a9f3d20053b27868bf691d881c1c"
+  },
+  "id": "03JUEy1bdlLMViWG",
+  "tags": []
+}
